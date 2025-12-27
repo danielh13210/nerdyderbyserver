@@ -10,8 +10,12 @@ app.config['SECRET_KEY'] = 'your-secret-key'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Configuration
-SERIAL_PORT = 'COM5'  # Change this to your Arduino COM port
-BAUD_RATE = 115200
+import argparse
+parser = argparse.ArgumentParser(description='ESP32 Timer Monitor Server')
+parser.add_argument('--serial', type=str, required=True, help='Serial port for Arduino (e.g., COM3 or /dev/ttyACM0)')
+parser.add_argument('--baud', type=int, default=115200, help='Baud rate for serial communication')
+SERIAL_PORT = args.serial  # Change this to your Arduino COM port
+BAUD_RATE = args.baud
 
 # Store recent data
 data_records = []
