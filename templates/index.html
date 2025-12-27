@@ -225,6 +225,7 @@
     <script>
         const socket = io();
         let recordCount = 0;
+        let records=[];
         
         socket.on('connect', function() {
             console.log('Connected to server');
@@ -240,10 +241,13 @@
         
         socket.on('new_data', function(data) {
             console.log('New data:', data);
-            addRow(data);
+            if (!records[data.time]){
+                addRow(data);
+            }
         });
         
         function addRow(data) {
+            records[data.time]=data;
             const tbody = document.getElementById('dataTable');
             
             // Remove "no data" message if present
