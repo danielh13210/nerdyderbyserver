@@ -6,14 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESP32 Timer Monitor</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="/scripts/webdialog.js"></script>
                 <!-- integrity="sha384-KGmzmrws7oAU2sG5qfETslFsscVcCaxQrX2d7PW7I9bTrsuTD/eSMFr9jaMS9i+b" -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"
             integrity="sha384-JSZXO0kKYHTylAsDYTb+7Kg2eUyalm19b8Pydcdf8sQ1cCKYZr9lLahoKT9+LFY5"
             crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/styles/dialog.css">
     <style>
         * {
             margin: 0;
@@ -68,6 +66,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            display:none;
+        }
+        
+        .controls-peekbox {
+            min-width: 100px;
+            display: block !important;
+        }
+        
+        #controls:hover, .controls-peekbox:hover #controls, .controls:focus-within {
+            display:block;
         }
         
         .stats {
@@ -190,25 +198,26 @@
     <div class="container">
         <div class="header">
             <h1>🎯 Nerdy Derby Leaderboard</h1>
-            <div class="status connected" id="status">● Connected</div>
         </div>
         
-        <div class="controls">
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="stat-label">Total Records</div>
-                    <div class="stat-value" id="totalRecords">0</div>
+        <div class="controls controls-peekbox">
+            <div class="controls" id="controls">
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Records</div>
+                        <div class="stat-value" id="totalRecords">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Last ID</div>
+                        <div class="stat-value" id="lastId">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Last Time</div>
+                        <div class="stat-value" id="lastTime">-</div>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-label">Last ID</div>
-                    <div class="stat-value" id="lastId">-</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Last Time</div>
-                    <div class="stat-value" id="lastTime">-</div>
-                </div>
+                <button onclick="clearData()">Clear All Data</button>
             </div>
-            <button onclick="clearData()">Clear All Data</button>
         </div>
         
         <div class="table-container">
@@ -230,21 +239,18 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import DialogUtilities from './static/webdialog.js';
         const socket = io();
         let recordCount = 0;
         let records=[];
         
         socket.on('connect', function() {
             console.log('Connected to server');
-            document.getElementById('status').textContent = '● Connected';
-            document.getElementById('status').classList.add('connected');
         });
         
         socket.on('disconnect', function() {
             console.log('Disconnected from server');
-            document.getElementById('status').textContent = '● Disconnected';
-            document.getElementById('status').classList.remove('connected');
         });
         
         socket.on('new_data', function(data) {
@@ -258,7 +264,7 @@
             if(recordCount==0){
                  DialogUtilities.showDialog(`ID ${data.id} won at ${data.time}`,"We have a winner!");
                  confetti({zIndex:1002,origin:{y:0},particleCount:1000,spread:2000});
-                 new Audio('/media/winner.mp3').play();
+                 new Audio('static/winner.mp3').play();
             }
             records[data.time]=data;
             const tbody = document.getElementById('dataTable');
@@ -301,6 +307,7 @@
                     });
             }
         }
+        window.clearData=clearData;
         
         // Load existing data on page load
         fetch('/api/data')

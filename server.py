@@ -87,6 +87,19 @@ def index():
     """Main web page"""
     return render_template('index.html')
 
+@app.route('/competition')
+def competition():
+    """Main web page"""
+    return render_template('competition.html')
+
+@app.route('/static/<path:subpath>')
+def static_obj(subpath):
+    import os, magic
+    path=os.path.join('static',subpath)
+    resp=Response((f:=open().read()),mimetype=mime.from_file(path))
+    f.close()
+    return resp
+
 @app.route('/api/data')
 def get_data():
     """API endpoint to get all stored data"""
